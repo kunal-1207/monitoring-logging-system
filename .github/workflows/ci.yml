@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r app/requirements.txt
+        
+    - name: Check Docker Compose file
+      run: |
+        docker-compose config
+        
+    - name: Validate Kubernetes manifests
+      run: |
+        for file in k8s/*.yaml; do
+          echo "Validating $file"
+          kubectl apply --dry-run=client -f "$file"
+        done

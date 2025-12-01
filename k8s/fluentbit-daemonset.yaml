@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: fluentbit
+spec:
+  selector:
+    matchLabels:
+      app: fluentbit
+  template:
+    metadata:
+      labels:
+        app: fluentbit
+    spec:
+      containers:
+      - name: fluentbit
+        image: fluent/fluent-bit:latest
+        volumeMounts:
+        - name: varlogcontainers
+          mountPath: /var/log/containers
+          readOnly: true
+        - name: fluentbit-config
+          mountPath: /fluent-bit/etc/
+      volumes:
+      - name: varlogcontainers
+        hostPath:
+          path: /var/log/containers
+      - name: fluentbit-config
+        configMap:
+          name: fluentbit-config

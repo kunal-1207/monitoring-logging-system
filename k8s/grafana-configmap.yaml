@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+data:
+  datasources.yml: |
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-service:9090
+        isDefault: true
+  dashboards.yml: |
+    apiVersion: 1
+    providers:
+      - name: 'default'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+  flask-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Flask App Monitoring",
+        "tags": ["flask", "monitoring"],
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "HTTP Requests Total",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "http_requests_total",
+                "legendFormat": "{{method}} {{endpoint}} {{status}}"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 0,
+              "y": 0
+            }
+          },
+          {
+            "id": 2,
+            "title": "HTTP Request Latency",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "http_request_duration_seconds{quantile=\"0.5\"}",
+                "legendFormat": "50th percentile"
+              },
+              {
+                "expr": "http_request_duration_seconds{quantile=\"0.95\"}",
+                "legendFormat": "95th percentile"
+              }
+            ],
+            "gridPos": {
+              "h": 8,
+              "w": 12,
+              "x": 12,
+              "y": 0
+            }
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "timepicker": {},
+        "templating": {
+          "list": []
+        },
+        "annotations": {
+          "list": []
+        },
+        "refresh": "5s",
+        "schemaVersion": 16,
+        "version": 0,
+        "links": []
+      }
+    }
